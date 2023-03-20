@@ -1,0 +1,174 @@
+#!/bin/bash
+
+if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+  echo "Usage: internsctl file getinfo [options] <file-name>"
+  echo "Options:"
+  echo "  -s, --size          print file size"
+  echo "  -p, --permissions   print file permissions"
+  echo "  -o, --owner         print file owner"
+  echo "  -m, --last-modified print last modified time"
+  exit 0
+fi
+
+if [ -z "$1" ]; then
+  echo "Error: Missing file name"
+  echo "Usage: internsctl file getinfo [options] <file-name>"
+  exit 1
+fi
+
+size=false
+permissions=false
+owner=false
+last_modified=false
+
+while [ -n "$1" ]; do
+  case "$1" in
+    -s|--size) size=true ;;
+    -p|--permissions) permissions=true ;;
+    -o|--owner) owner=true ;;
+    -m|--last-modified) last_modified=true ;;
+    *) filename="$1" ;;
+  esac
+  shift
+done
+
+if [ ! -f "$filename" ]; then
+  echo "Error: File not found"
+  exit 1
+fi
+
+if [ "$permissions" = true ]; then
+  echo -n "Permissions: "
+  stat -c "%A" "$filename"
+fi
+
+if [ "$size" = true ]; then
+  echo -n "Size(B): "
+  stat -c "%s" "$filename"
+fi
+
+if [ "$owner" = true ]; then
+  echo -n "Owner: "
+  stat -c "%U" "$filename"
+fi
+
+if [ "$last_modified" = true ]; then
+  echo -n "Last modified: "
+  stat -c "%y" "$filename"
+fi
+
+if [ "$permissions" = false ] && [ "$size" = false ] && [ "$owner" = false ] && [ "$last_modified" = false ]; then
+  echo -n "File: "
+  echo "$filename"
+  echo -n "Access: "
+  stat -c "%A" "$filename"
+  echo -n "Size(B): "
+  stat -c "%s" "$filename"
+  echo -n "Owner: "
+  stat -c "%U" "$filename"
+  echo -n "Modify: "
+  stat -c "%y" "$filename"
+fi
+#!/bin/bash
+
+if [[ $1 == "file" ]]; then
+    if [[ $2 == "getinfo" ]]; then
+        if [[ -f $3 ]]; then
+            echo "Name: $3"
+            echo "Size: $(du -h "$3" | cut -f1)"
+            echo "Owner: $(stat -c '%U' "$3")"
+            echo "Permission: $(stat -c '%a' "$3")"
+            echo "Last modified: $(date -r "$3" +"%Y-%m-%d %H:%M:%S")"
+        else
+            echo "File does not exist"
+        fi
+    fi
+fi
+#!/bin/bash
+
+if [[ $1 == "--help" ]]; then
+    echo "Usage:"
+    echo "  internsctl cpu getinfo    # Get CPU information"
+    echo "  internsctl memory getinfo # Get memory information"
+    echo "  internsctl user create    # Create a new user"
+    echo "  internsctl user list      # List all regular users"
+    echo "  internsctl --version      # Print version information"
+    exit 0
+elif [[ $1 == "--version" ]]; then
+    echo "internsctl version 1.0.0"
+    exit 0
+elif [[ $1 == "cpu" && $2 == "getinfo" ]]; then
+    lscpu
+    exit 0
+elif [[ $1 == "memory" && $2 == "getinfo" ]]; then
+    free -h
+    exit 0
+elif [[ $1 == "user" && $2 == "create" && ! -z $3 ]]; then
+    sudo useradd -m $3
+    sudo passwd $3
+    exit 0
+elif [[ $1 == "user" && $2 == "list" ]]; then
+    cat /etc/passwd | awk -F: '{if ($3 >= 1000 && $3 != 65534) print $1}'
+    exit 0
+else
+    echo "Invalid command. Use --help option to see usage guidelines."
+    exit 1
+fi
+#!/bin/bash
+
+if [[ $1 == "--help" ]]; then
+    echo "Usage:"
+    echo "  internsctl cpu getinfo    # Get CPU information"
+    echo "  internsctl memory getinfo # Get memory information"
+    echo "  internsctl user create    # Create a new user"
+    echo "  internsctl --version      # Print version information"
+    exit 0
+elif [[ $1 == "--version" ]]; then
+    echo "internsctl version 1.0.0"
+    exit 0
+elif [[ $1 == "cpu" && $2 == "getinfo" ]]; then
+    lscpu
+    exit 0
+elif [[ $1 == "memory" && $2 == "getinfo" ]]; then
+    free -h
+    exit 0
+elif [[ $1 == "user" && $2 == "create" && ! -z $3 ]]; then
+    sudo useradd -m $3
+    sudo passwd $3
+    exit 0
+else
+    echo "Invalid command. Use --help option to see usage guidelines."
+    exit 1
+fi
+#!/bin/bash
+if [[ $1 == "--help" ]]; then
+   echo "Usage: internsctl [memory|cpu] [getinfo]"
+   echo "Display system information on Linux systems."
+   echo ""
+   echo "Options:"
+   echo "  memory          Display memory information"
+   echo "  cpu             Display CPU information"
+   echo "  getinfo         Display detailed information for the specified option"
+   echo ""
+   echo "Examples:"
+   echo "  internsctl memory getinfo      Display memory information"
+   echo "  internsctl cpu getinfo         Display CPU information"
+   exit 0
+fi
+if [[ $1 == "--version" ]]; then
+   echo "internsctl version 1.0"
+   exit 0
+fi
+if [[ $1 == "memory" && $2 == "getinfo" ]]; then
+   free -m
+   exit 0
+fi
+
+if [[ $1 == "cpu" && $2 == "getinfo" ]]; then
+   lscpu
+   exit 0
+fi
+
+echo "Error: Invalid option. Use internsctl --help for usage information."
+exit 1
+

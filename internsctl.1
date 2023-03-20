@@ -1,0 +1,35 @@
+#!/bin/bash
+
+if [[ $1 == "--help" ]]; then
+   echo "Usage: internsctl [memory|cpu] [getinfo]"
+   echo "Display system information on Linux systems."
+   echo ""
+   echo "Options:"
+   echo "  memory          Display memory information"
+   echo "  cpu             Display CPU information"
+   echo "  getinfo         Display detailed information for the specified option"
+   echo ""
+   echo "Examples:"
+   echo "  internsctl memory getinfo      Display memory information"
+   echo "  internsctl cpu getinfo         Display CPU information"
+   exit 0
+fi
+
+if [[ $1 == "--version" ]]; then
+   echo "internsctl version 1.0"
+   exit 0
+fi
+
+if [[ $1 == "memory" && $2 == "getinfo" ]]; then
+   free -m
+   exit 0
+fi
+
+if [[ $1 == "cpu" && $2 == "getinfo" ]]; then
+   lscpu
+   exit 0
+fi
+
+echo "Error: Invalid option. Use internsctl --help for usage information."
+exit 1
+
